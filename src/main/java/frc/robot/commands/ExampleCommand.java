@@ -4,7 +4,7 @@
 
 package frc.robot.commands;
 
-import frc.robot.subsystems.swervedrive;
+import frc.robot.subsystems.SwerveDriveSubsystem;
 import swervelib.SwerveDrive;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -21,7 +21,6 @@ public class ExampleCommand extends Command {
   public ExampleCommand(SwerveDrive subsystem) {
     m_subsystem = subsystem;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(subsystem);
   }
 
   // Called when the command is initially scheduled.

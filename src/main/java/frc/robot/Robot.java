@@ -5,8 +5,10 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.SwerveDriveSubsystem;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -14,6 +16,10 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  * this project, you must also update the Main.java file in the project.
  */
 public class Robot extends TimedRobot {
+
+  public final XboxController driverController = new XboxController(0);
+	private final XboxController operatorController = new XboxController(1);
+  public SwerveDriveSubsystem swerve;
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;

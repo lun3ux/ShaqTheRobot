@@ -1,0 +1,14 @@
+{
+    "imu": {
+      "type": "pigeon",
+      "id": 20,
+      "canbus": "rio"
+    },
+    "invertedIMU": false,
+    "modules": [
+      "Module0.json",
+      "Module1.json",
+      "Module2.json",
+      "Module3.json"
+    ]
+  }
