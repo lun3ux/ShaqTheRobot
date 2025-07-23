@@ -1,60 +1,54 @@
-public package frc.robot;
+package frc.robot;
 
 import swervelib.motors.SwerveMotor;
-import swervelib.encoders.SwerveAbsoluteEncoder;
+import swervelib.motors.SparkMaxSwerve;
+import swervelib.encoders.CANCoderSwerve;
 import swervelib.parser.SwerveModuleConfiguration;
-import swervelib.parser.PIDFConfig;
 import swervelib.parser.json.modules.ConversionFactorsJson;
-import swervelib.SwerveModulePhysicalCharacteristics;
+import swervelib.parser.SwerveModulePhysicalCharacteristics;
+import swervelib.parser.PIDFConfig;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class SwerveConfig {
-  
-  // Example of front-left swerve module configuration
-  public static SwerveModuleConfiguration frontLeftConfig() {
-    
-    // Create motor instances (replace with actual motor constructors)
-    SwerveMotor frontLeftDriveMotor = new SwerveMotor(1); // Example ID 1 for drive motor
-    SwerveMotor frontLeftAngleMotor = new SwerveMotor(2); // Example ID 2 for angle motor
-    
-    // Create encoder (example, assuming using absolute encoder CANCoder)
-    SwerveAbsoluteEncoder frontLeftEncoder = new SwerveAbsoluteEncoder(3); // Example ID 3 for absolute encoder
-    
-    // Define conversion factors for drive motor and angle motor
-    ConversionFactorsJson conversionFactors = new ConversionFactorsJson(0.5, 360.0);  // Example: 0.5 meters per rotation, 360 degrees per steering rotation
-    
-    // Define PIDF Configurations
-    PIDFConfig anglePIDF = new PIDFConfig(0.1, 0.0, 0.0, 0.0);  // Example PIDF for angle motor
-    PIDFConfig velocityPIDF = new PIDFConfig(0.05, 0.0, 0.0, 0.0);  // Example PIDF for drive motor
-    
-    // Define physical characteristics (e.g., wheel diameter, etc.)
-    SwerveModulePhysicalCharacteristics physicalCharacteristics = new SwerveModulePhysicalCharacteristics(0.1, 0.02);  // Example wheel diameter and track width
-    
-    // Define the module location (distance from robot center, in meters)
-    Translation2d moduleLocation = new Translation2d(0.5, 0.5);  // Example front-left module at (0.5, 0.5)
-    
-    // Create the SwerveModuleConfiguration for the front-left swerve module
-    return new SwerveModuleConfiguration(
+
+    // Initialize motors (assuming you're using CANSparkMax here)
+    SparkMaxSwerve frontLeftDriveMotor = new SparkMaxSwerve(1, true, null);  // Motor controller for drive motor
+    SparkMaxSwerve frontLeftAngleMotor = new SparkMaxSwerve(2); // Motor controller for angle motor
+
+    // Initialize encoders (assuming you're using CANCoder)
+    CANCoderSwerve frontLeftEncoder = new CANCoderSwerve(3);  // Encoder for swerve module (adjust ID as needed)
+
+    // Create ConversionFactorsJson (check the appropriate values)
+    ConversionFactorsJson conversionFactors = new ConversionFactorsJson(1.0, 1.0);  // Example values, replace with actual conversion factors
+
+    // Create PIDF configurations (these will need to be tuned)
+    PIDFConfig anglePIDF = new PIDFConfig(0.0, 0.0, 0.0, 0.0);  // Example PIDF values for angle motor (adjust as needed)
+    PIDFConfig velocityPIDF = new PIDFConfig(0.0, 0.0, 0.0, 0.0);  // Example PIDF values for drive motor (adjust as needed)
+
+    // Create Physical Characteristics (you'll need to define this class)
+    SwerveModulePhysicalCharacteristics physicalCharacteristics = new SwerveModulePhysicalCharacteristics(
+        0.1,  // Module radius (adjust as needed)
+        0.2   // Module width (adjust as needed)
+    );
+
+    // Initialize Swerve Module Configuration
+    SwerveModuleConfiguration frontLeftModuleConfig = new SwerveModuleConfiguration(
         frontLeftDriveMotor,
         frontLeftAngleMotor,
         conversionFactors,
         frontLeftEncoder,
-        0.0,  // Angle offset in degrees (no offset)
-        moduleLocation.getX(),
-        moduleLocation.getY(),
+        0.0,  // Angle offset (adjust as needed)
+        0.5,  // X position in meters (adjust as needed)
+        0.5,  // Y position in meters (adjust as needed)
         anglePIDF,
         velocityPIDF,
         physicalCharacteristics,
-        false,  // Encoder not inverted
+        false,  // Absolute encoder not inverted
         false,  // Drive motor not inverted
         false,  // Angle motor not inverted
-        "Front Left",  // Name for debugging
-        true   // Use cosine compensation
+        "Front Left Module",  // Name for the module
+        true  // Use cosine compensation
     );
-  }
 
-  // Repeat for other swerve modules (front-right, rear-left, rear-right)
-}
- {
-    
+    // Similarly, you can define other modules such as frontRightModuleConfig, backLeftModuleConfig, backRightModuleConfig...
 }
