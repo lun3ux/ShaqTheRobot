@@ -23,5 +23,6 @@
       "drive": false,
       "angle": false
     },
+    "gearRatio": 6.12,
     "absoluteEncoderInverted": false
   }
