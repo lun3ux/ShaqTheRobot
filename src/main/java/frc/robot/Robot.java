@@ -1,102 +1,99 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.SwerveDriveSubsystem;
+import swervelib.SwerveDrive;
+import swervelib.parser.SwerveDriveConfiguration;
 
-/**
- * The methods in this class are called automatically corresponding to each mode, as described in
- * the TimedRobot documentation. If you change the name of this class or the package after creating
- * this project, you must also update the Main.java file in the project.
- */
 public class Robot extends TimedRobot {
 
+  // Controllers
   public final XboxController driverController = new XboxController(0);
-	private final XboxController operatorController = new XboxController(1);
-  public SwerveDriveSubsystem swerve;
-  private Command m_autonomousCommand;
+  private final XboxController operatorController = new XboxController(1);
+   private static final Pose2d INITIAL_POSE = new Pose2d(0, 0, new Rotation2d(0)); // Starting at origin (0,0), heading = 0 degrees.\
+  
+  // Swerve Drive Subsystem
+  SwerveDriveConfiguration swerveDriveConfiguration = new SwerveDriveConfiguration(null, null, null, isAutonomous(), null, null);
+  private SwerveDriveSubsystem swerve;
 
-  /**
-   * This function is run when the robot is first started up and should be used for any
-   * initialization code.
-   */
-  public Robot() {
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-    // autonomous chooser on the dashboard.
+  @Override
+  public void robotInit() {
+  }
+    // Initialize the SwerveDriveSubsystem with the appropriate swerveDrive object
+    SwerveDrive swerveDrive = new SwerveDrive(swerveDriveConfiguration, null, SwerveDriveSubsystem.MAX_LINEAR_SPEED, INITIAL_POSE);
+    swerve = new SwerveDriveSubsystem(swerveDrive);
   }
 
-  /**
-   * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
-   * that you want ran during disabled, autonomous, teleoperated and test.
-   *
-   * <p>This runs after the mode specific periodic functions, but before LiveWindow and
-   * SmartDashboard integrated updating.
-   */
+  // Called every 20 ms, runs the Scheduler (which schedules and runs commands)
   @Override
   public void robotPeriodic() {
-    // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
-    // commands, running already-scheduled commands, removing finished or interrupted commands,
-    // and running subsystem periodic() methods.  This must be called from the robot's periodic
-    // block in order for anything in the Command-based framework to work.
-    CommandScheduler.getInstance().run();
+    // Optionally, put debug information on the SmartDashboard
+    swerve.periodic();
   }
 
-  /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    // Logic for when the robot is disabled
+  }
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    // Any periodic logic during disabled mode (diagnostics, etc.)
+  }
 
-  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    // schedule the autonomous command (example)
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
-    }
+    // Schedule autonomous commands if you have any
   }
 
-  /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    // Autonomous periodic logic
+  }
 
   @Override
   public void teleopInit() {
-    // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
-    // continue until interrupted by another command, remove
-    // this line or comment it out.
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
-    }
+    // Logic for when teleop starts
   }
 
-  /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    // Get joystick inputs
+    double translationX = driverController.getLeftX();  // X-axis for translation
+    double translationY = driverController.getLeftY();  // Y-axis for translation
+    double headingX = driverController.getRightX();     // X-axis for rotation
+    double headingY = driverController.getRightY();     // Y-axis for rotation (if used)
+
+    // Apply joystick inputs to the swerve drive
+    swerve.driveCommand(
+      () -> translationX, // Translation in X direction (DoubleSupplier)
+      () -> translationY, // Translation in Y direction (DoubleSupplier)
+      () -> headingX,     // Rotation speed based on X axis
+      () -> headingY      // (Optionally) rotation speed based on Y axis (if used)
+  ).schedule();  // Schedules the command to run
+}
+}
 
   @Override
   public void testInit() {
-    // Cancels all running commands at the start of test mode.
-    CommandScheduler.getInstance().cancelAll();
+    // Cancel all running commands at the start of test mode
   }
 
-  /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+    // Periodic logic for test mode
+  }
 
-  /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {}
+  public void simulationInit() {
+    // Initialize simulation (if necessary)
+  }
 
-  /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    // Periodic simulation logic (if necessary)
+  }
 }
