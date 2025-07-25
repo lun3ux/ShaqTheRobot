@@ -13,6 +13,8 @@ import swervelib.SwerveModule;
 import swervelib.math.SwerveMath;
 
 
+
+
 public class SwerveDriveSubsystem extends SubsystemBase {
     private final SwerveDrive swerveDrive;
 
@@ -27,18 +29,20 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   }
 
 
-
   public SwerveModule[] getModules() {
     return swerveDrive.getModules();
   }
 
+  public void updateOdometry() {
+    swerveDrive.updateOdometry();
+}
 
   public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY, 
                               DoubleSupplier rotation, boolean isFieldRelative) {
     return new RunCommand(() -> {
-      double x = applyDeadband(translationX.getAsDouble(), DEAD_BAND_THRESHOLD);
-      double y = applyDeadband(translationY.getAsDouble(), DEAD_BAND_THRESHOLD);
-      double rot = applyDeadband(rotation.getAsDouble(), DEAD_BAND_THRESHOLD);
+      double x = applyDeadband(translationX.getAsDouble());
+      double y = applyDeadband(translationY.getAsDouble());
+      double rot = applyDeadband(rotation.getAsDouble());
 
       Translation2d scaledTranslation = SwerveMath.scaleTranslation(
           new Translation2d(x, y),
@@ -59,27 +63,20 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     return swerveDrive.getPose();
 }
 
-  public void zeroGyro() {
-    swerveDrive.zeroGyro();
+private double applyDeadband(double input) {
+  return Math.abs(input) > 0.05 ? input : 0.0;
 }
-
-  private static double applyDeadband(double value, double deadband) {
-    return (Math.abs(value) > deadband) ? value : 0.0;
-  }
 
   @Override
   public void periodic() {
       var pose = swerveDrive.getPose();
-  
-      var modulePositions = swerveDrive.getModulePositions(); // Actual states from YAGSL
-          double angleDeg = modulePositions[1].angle.getDegrees();
-          double distance = modulePositions[1].distanceMeters;
-  
-          SmartDashboard.putNumber("Module " + 1 + " Angle (deg)", angleDeg);
-          SmartDashboard.putNumber("Module " + 1 + " Distance (m)", distance);
-          SmartDashboard.putNumber("Robot X", pose.getX());
-          SmartDashboard.putNumber("Robot Y", pose.getY());
-          SmartDashboard.putNumber("Robot Heading", pose.getRotation().getDegrees());
-
+      swerveDrive.getModulePositions();
+      for (int i = 0; i < swerveDrive.getModules().length; i++) {
+        var module = swerveDrive.getModules()[i];
+        double rawAngle = module.getAbsoluteEncoder().getAbsolutePosition();
+        double correctedAngle = swerveDrive.getModulePositions()[i].angle.getDegrees();
+        SmartDashboard.putNumber("Module " + i + " Raw Abs Angle", rawAngle);
+        SmartDashboard.putNumber("Module " + i + " Corrected Angle", correctedAngle);
+    }
       }
     }
