@@ -37,12 +37,11 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         if (swerveDriveSubsystem != null) {
-            // Schedule the drive command with joystick inputs
             swerveDriveSubsystem.driveCommand(
-                () -> driverController.getLeftY(),  // forward/backward
-                () -> driverController.getLeftX(),   // strafe
-                () -> driverController.getRightX(),  // rotation
-                true                                // field-relative driving enabled
+                () -> driverController.getLeftY(),
+                () -> driverController.getLeftX(),
+                () -> driverController.getRightX(),
+                true
             ).schedule();
         }
     }
