@@ -1,19 +1,31 @@
 package frc.robot.subsystems;
 
+import java.util.List;
 import java.util.function.DoubleSupplier;
+
+import com.ctre.phoenix.sensors.CANCoder;
+
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import swervelib.SwerveDrive;
-import swervelib.math.SwerveMath;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 
+import swervelib.SwerveDrive;
+import swervelib.SwerveModule;
+import swervelib.math.SwerveMath;
+import swervelib.SwerveModule;
+
+
 public class SwerveDriveSubsystem extends SubsystemBase {
+
   private final SwerveDrive swerveDrive;
 
-  // Constants
+  // constants...
   public static final double MAX_LINEAR_SPEED = 2.5;
   public static final double MAX_ANGULAR_SPEED = Math.PI * 2;
   public static final double DEAD_BAND_THRESHOLD = 0.05;
@@ -23,74 +35,63 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     this.swerveDrive = swerveDrive;
   }
 
-  // Apply deadband to joystick inputs
+  public SwerveModule[] getModules() {
+    return swerveDrive.getModules();
+  }
+
+  // other existing methods...
+
+  public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY, 
+                              DoubleSupplier rotation, boolean isFieldRelative) {
+    return new RunCommand(() -> {
+      double x = applyDeadband(translationX.getAsDouble(), DEAD_BAND_THRESHOLD);
+      double y = applyDeadband(translationY.getAsDouble(), DEAD_BAND_THRESHOLD);
+      double rot = applyDeadband(rotation.getAsDouble(), DEAD_BAND_THRESHOLD);
+
+      Translation2d scaledTranslation = SwerveMath.scaleTranslation(
+          new Translation2d(x, y),
+          TRANSLATION_SCALING_FACTOR
+      );
+
+      swerveDrive.drive(
+          scaledTranslation,
+          rot * MAX_ANGULAR_SPEED,
+          isFieldRelative,
+          true
+      );
+    }, this);
+  }
+
+
+  public Pose2d getPose() {
+    return swerveDrive.getPose();
+}
+
+  public void zeroGyro() {
+    swerveDrive.zeroGyro();
+}
+
   private static double applyDeadband(double value, double deadband) {
     return (Math.abs(value) > deadband) ? value : 0.0;
   }
 
-  // Maximum velocity getters
-  public double getMaximumVelocity() {
-    return MAX_LINEAR_SPEED;
-  }
-  
-  public double getMaximumAngularVelocity() {
-    return MAX_ANGULAR_SPEED;
-  }
-
-  // Periodic updates for SmartDashboard (for debugging)
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Robot X", getPose().getX());
-    SmartDashboard.putNumber("Robot Y", getPose().getY());
-    SmartDashboard.putNumber("Heading", getPose().getRotation().getDegrees());
+      var pose = swerveDrive.getPose();
+      SmartDashboard.putNumber("Robot X", pose.getX());
+      SmartDashboard.putNumber("Robot Y", pose.getY());
+      SmartDashboard.putNumber("Robot Heading", pose.getRotation().getDegrees());
+  
+      var modulePositions = swerveDrive.getModulePositions(); // Actual states from YAGSL
+  
+      for (int i = 0; i < modulePositions.length; i++) {
+          var pos = modulePositions[i];
+          double angleDeg = pos.angle.getDegrees();
+          double distance = pos.distanceMeters; // or distanceMeters, depending on YAGSL version
+  
+          SmartDashboard.putNumber("Module " + i + " Angle (deg)", angleDeg);
+          SmartDashboard.putNumber("Module " + i + " Distance (m)", distance);
+      }
   }
 
-  // Get the robot's pose
-  public Pose2d getPose() {
-    return swerveDrive.getPose();
-  }
-
-  // Stop the swerve drive
-  public void stop() {
-    swerveDrive.drive(new Translation2d(0, 0), 0, false, false);
-  }
-
-  // Simulation periodic (empty for now, add simulation logic if necessary)
-  @Override
-  public void simulationPeriodic() {
-    // Simulation-specific code goes here
-  }
-
-  /**
-   * Generate a drive command based on joystick input.
-   *
-   * @param translationX Translation in the X direction.
-   * @param translationY Translation in the Y direction.
-   * @param headingX     Heading X to calculate angle of the joystick.
-   * @param headingY     Heading Y to calculate angle of the joystick.
-   */
-  public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY, 
-                              DoubleSupplier headingX, DoubleSupplier headingY) {
-    return new RunCommand(() -> {
-        // Apply deadband to the inputs
-        double xInput = applyDeadband(translationX.getAsDouble(), DEAD_BAND_THRESHOLD);
-        double yInput = applyDeadband(translationY.getAsDouble(), DEAD_BAND_THRESHOLD);
-
-        // Scale inputs for better control
-        Translation2d scaledInputs = SwerveMath.scaleTranslation(new Translation2d(xInput, yInput), TRANSLATION_SCALING_FACTOR);
-
-        // Calculate the target speeds for the swerve drive
-        var targetSpeeds = swerveDrive.swerveController.getTargetSpeeds(
-            scaledInputs.getX(),
-            scaledInputs.getY(),
-            headingX.getAsDouble(),
-            headingY.getAsDouble(),
-            swerveDrive.getOdometryHeading().getRadians(),
-            getMaximumVelocity()
-        );
-
-        // Drive the robot with the calculated speeds
-        swerveDrive.drive(targetSpeeds);
-    }, this);
-  }
 }

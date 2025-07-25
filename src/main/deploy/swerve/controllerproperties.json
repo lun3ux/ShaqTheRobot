@@ -1,9 +1,8 @@
 {
-    "deadband": 0.05,
-    "maxSpeed": 4.5,
-    "maxAngularVelocity": 10.0,
-    "teleopMode": "field",
-    "invertForward": false,
-    "invertStrafe": false,
-    "invertRotation": false
-  }
+  "angleJoystickRadiusDeadband": 0.5,
+"heading": {
+  "p": 0.08,
+  "i": 0,
+  "d": 0.025
+}
+}
