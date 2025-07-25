@@ -1,0 +1,15 @@
+{
+  "$schema": "https://broncbotz3481.github.io/YAGSL-Example/schemas/swervedrive_schema.json",
+  "imu": {
+    "type": "pigeon2",
+    "id": 20,
+    "canbus": "rio"
+  },
+  "invertedIMU": true,
+  "modules": [
+    "Module0.json",
+    "Module1.json",
+    "Module2.json",
+    "Module3.json"
+  ]
+}

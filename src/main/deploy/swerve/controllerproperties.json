@@ -1,0 +1,9 @@
+{
+    "deadband": 0.05,
+    "maxSpeed": 4.5,
+    "maxAngularVelocity": 10.0,
+    "teleopMode": "field",
+    "invertForward": false,
+    "invertStrafe": false,
+    "invertRotation": false
+  }
